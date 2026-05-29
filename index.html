@@ -166,7 +166,7 @@
       tbody.innerHTML = '';
       rows.forEach(row => {
         const cols = parseCSVRow(row);
-        if (cols.length < 14) return;
+        if (cols.length < 13) return;
         const currency = cols[0]?.trim();
         const buy  = parseFloat(cols[12]);
         const sell = parseFloat(cols[13]);
