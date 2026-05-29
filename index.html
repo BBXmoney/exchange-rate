@@ -3,52 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>อัตราแลกเงินวันนี้ - BBXmoney</title>
-  <meta name="description" content="อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตล่าสุด USD GBP EUR JPY และอื่นๆ อีกมากมาย">
+  <title>อัตราแลกเงินวันนี้ - BB Money Exchange | BBX</title>
+  <meta name="description" content="BB Money Exchange (BBX) อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตล่าสุด USD GBP EUR JPY และอื่นๆ">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
-    header { background: #1a56db; color: white; padding: 20px; text-align: center; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f8f0; color: #333; }
+    header {
+      background: linear-gradient(135deg, #1a7a1a, #2d9e2d);
+      color: white; padding: 24px 20px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    header img { width: 70px; height: 70px; margin-bottom: 8px; }
     header h1 { font-size: 1.8rem; }
     header p { opacity: 0.85; margin-top: 4px; }
     .badge { display: inline-block; background: #fbbf24; color: #333;
              padding: 3px 12px; border-radius: 20px; font-size: 0.85rem;
              margin-top: 8px; font-weight: bold; }
-    .updated { text-align: center; padding: 10px; color: #666; font-size: 0.9rem; }
+    .updated { text-align: center; padding: 10px; color: #555; font-size: 0.9rem; }
     table { width: 95%; max-width: 700px; margin: 10px auto 20px;
             border-collapse: collapse; background: white;
             border-radius: 10px; overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    th { background: #1a56db; color: white; padding: 12px; text-align: center; }
+    th { background: #1a7a1a; color: white; padding: 12px; text-align: center; }
     td { padding: 11px 12px; text-align: center; border-bottom: 1px solid #eee; font-size: 0.95rem; }
+    td.flag { font-size: 1.6rem; }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #f0f4f8; }
-    .buy { color: #16a34a; font-weight: bold; }
+    tr:hover td { background: #f0f8f0; }
+    .buy  { color: #16a34a; font-weight: bold; }
     .sell { color: #dc2626; font-weight: bold; }
     #loginBox { width: 90%; max-width: 380px; margin: 20px auto;
                 background: white; border-radius: 12px; padding: 28px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
-    #loginBox h2 { margin-bottom: 6px; color: #1a56db; }
+    #loginBox h2 { margin-bottom: 6px; color: #1a7a1a; }
     #loginBox p { color: #666; font-size: 0.9rem; margin-bottom: 14px; }
     #loginBox input { width: 100%; padding: 10px 14px; margin: 6px 0;
                       border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
     #loginBox button { width: 100%; padding: 11px; margin-top: 10px;
-                       background: #1a56db; color: white; border: none;
+                       background: #1a7a1a; color: white; border: none;
                        border-radius: 8px; font-size: 1rem; cursor: pointer; }
-    #loginBox button:hover { background: #1e40af; }
+    #loginBox button:hover { background: #145e14; }
     #errorMsg { color: #ef4444; font-size: 0.88rem; margin-top: 8px; min-height: 20px; }
     #logoutBtn { display: block; margin: 0 auto 16px; padding: 8px 24px;
                  background: #ef4444; color: white; border: none;
                  border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
-    footer { text-align: center; padding: 20px; color: #999; font-size: 0.82rem; }
+    footer { text-align: center; padding: 20px; color: #777; font-size: 0.82rem; }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>💱 อัตราแลกเงินวันนี้</h1>
-  <p>BBXmoney — อัปเดต Real Time</p>
+  <img src="bb_logo-removebg-preview.png" alt="BBX Logo">
+  <h1>BB Money Exchange</h1>
+  <p>BBX — อัตราแลกเงินวันนี้ อัปเดต Real Time</p>
   <span id="vipBadge" class="badge" style="display:none">⭐ สมาชิก VIP</span>
 </header>
 
@@ -57,6 +64,7 @@
 <table>
   <thead>
     <tr>
+      <th>ธง</th>
       <th>สกุลเงิน</th>
       <th>ชื่อ</th>
       <th>รับซื้อ</th>
@@ -64,7 +72,7 @@
     </tr>
   </thead>
   <tbody id="rateTable">
-    <tr><td colspan="4">กำลังโหลด...</td></tr>
+    <tr><td colspan="5">กำลังโหลด...</td></tr>
   </tbody>
 </table>
 
@@ -79,15 +87,59 @@
 
 <button id="logoutBtn" style="display:none" onclick="logout()">ออกจากระบบ</button>
 
-<footer>
-  © BBXmoney | อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตอัตโนมัติ
-</footer>
+<footer>© BB Money Exchange (BBX) | อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตอัตโนมัติ</footer>
 
 <script>
   const SUPABASE_URL = 'https://rgyihmjdowaeoofqwpcp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_yKxRRNmq80FQirLEv2oJhw_w6lly-gX';
   const PUBLIC_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs6JEWMlGmxBenrtg7NaHuNiegAFmOhDft1Yy5tQp15NmgsAyVtW9D9X8SU31bw4rqtn4WYmokjha8/pub?gid=0&single=true&output=csv';
-  const VIP_CSV     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs6JEWMlGmxBenrtg7NaHuNiegAFmOhDft1Yy5tQp15NmgsAyVtW9D9X8SU31bw4rqtn4WYmokjha8/pub?gid=0&single=true&output=csv'; // ใช้อันเดียวกันก่อน จนกว่าจะสร้าง VIP Sheet
+  const VIP_CSV = PUBLIC_CSV;
+
+  const CURRENCY_INFO = {
+    USD: { name:'ดอลลาร์สหรัฐ',        flag:'🇺🇸' },
+    GBP: { name:'ปอนด์สเตอร์ลิง',       flag:'🇬🇧' },
+    EUR: { name:'ยูโร',                  flag:'🇪🇺' },
+    CNY: { name:'หยวน จีน',             flag:'🇨🇳' },
+    TWD: { name:'ดอลลาร์ไต้หวัน',       flag:'🇹🇼' },
+    JPY: { name:'เยน ญี่ปุ่น',           flag:'🇯🇵' },
+    SGD: { name:'ดอลลาร์สิงคโปร์',      flag:'🇸🇬' },
+    HKD: { name:'ดอลลาร์ฮ่องกง',        flag:'🇭🇰' },
+    KRW: { name:'วอน เกาหลีใต้',        flag:'🇰🇷' },
+    MYR: { name:'ริงกิต มาเลเซีย',       flag:'🇲🇾' },
+    VND: { name:'ดอง เวียดนาม',          flag:'🇻🇳' },
+    INR: { name:'รูปี อินเดีย',           flag:'🇮🇳' },
+    AUD: { name:'ดอลลาร์ออสเตรเลีย',    flag:'🇦🇺' },
+    CHF: { name:'ฟรังก์ สวิส',           flag:'🇨🇭' },
+    NZD: { name:'ดอลลาร์นิวซีแลนด์',    flag:'🇳🇿' },
+    CAD: { name:'ดอลลาร์แคนาดา',        flag:'🇨🇦' },
+    DKK: { name:'โครน เดนมาร์ก',        flag:'🇩🇰' },
+    NOK: { name:'โครน นอร์เวย์',         flag:'🇳🇴' },
+    SEK: { name:'โครนา สวีเดน',          flag:'🇸🇪' },
+    RUB: { name:'รูเบิล รัสเซีย',         flag:'🇷🇺' },
+    OMR: { name:'เรียล โอมาน',           flag:'🇴🇲' },
+    AED: { name:'ดีแรห์ม UAE',           flag:'🇦🇪' },
+    QAR: { name:'เรียล กาตาร์',          flag:'🇶🇦' },
+    SAR: { name:'ริยัล ซาอุดีอาระเบีย',  flag:'🇸🇦' },
+    BHD: { name:'ดีนาร์ บาห์เรน',        flag:'🇧🇭' },
+    BND: { name:'ดอลลาร์บรูไน',          flag:'🇧🇳' },
+    KWD: { name:'ดีนาร์ คูเวต',          flag:'🇰🇼' },
+    IDR: { name:'รูเปีย อินโดนีเซีย',    flag:'🇮🇩' },
+    ZAR: { name:'แรนด์ แอฟริกาใต้',      flag:'🇿🇦' },
+    PHP: { name:'เปโซ ฟิลิปปินส์',       flag:'🇵🇭' },
+    MMK: { name:'จัต พม่า',              flag:'🇲🇲' },
+    MOP: { name:'ปาตากา มาเก๊า',         flag:'🇲🇴' },
+    LAK: { name:'กีบ ลาว',               flag:'🇱🇦' },
+  };
+
+  function getDecimals(currency, value) {
+    const five = ['JPY','KRW','VND','IDR','MMK','LAK'];
+    const four = ['MOP','PHP','TWD','HKD'];
+    if (five.includes(currency)) return 5;
+    if (four.includes(currency)) return 4;
+    if (value < 0.1) return 5;
+    if (value < 1)   return 4;
+    return 2;
+  }
 
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -102,18 +154,20 @@
       tbody.innerHTML = '';
       rows.forEach(row => {
         const cols = row.split(',');
-        if (cols.length < 2) return;
+        if (cols.length < 14) return;
         const currency = cols[0]?.trim();
-        const name     = cols[2]?.trim(); // Last Update อยู่ col 2, ปรับถ้าต้องการ
-        const buy      = parseFloat(cols[13]); // คอลัมน์ BUY (M)
-        const sell     = parseFloat(cols[14]); // คอลัมน์ SELL (N)
-        if (!currency || isNaN(buy)) return;
+        const buy  = parseFloat(cols[13]);
+        const sell = parseFloat(cols[14]);
+        if (!currency || isNaN(buy) || isNaN(sell)) return;
+        const info = CURRENCY_INFO[currency] || { name: currency, flag: '🏳️' };
+        const dec  = getDecimals(currency, buy);
         tbody.innerHTML += `
           <tr>
+            <td class="flag">${info.flag}</td>
             <td><strong>${currency}</strong></td>
-            <td>${name || '-'}</td>
-            <td class="buy">${buy.toFixed(5)}</td>
-            <td class="sell">${sell.toFixed(5)}</td>
+            <td>${info.name}</td>
+            <td class="buy">${buy.toFixed(dec)}</td>
+            <td class="sell">${sell.toFixed(dec)}</td>
           </tr>`;
       });
       const now = new Date().toLocaleString('th-TH');
@@ -121,7 +175,7 @@
         `${isVip ? '⭐ เรทพิเศษ VIP' : 'เรทปกติ'} | อัปเดตล่าสุด: ${now}`;
     } catch(e) {
       document.getElementById('rateTable').innerHTML =
-        '<tr><td colspan="4">ไม่สามารถโหลดข้อมูลได้</td></tr>';
+        '<tr><td colspan="5">ไม่สามารถโหลดข้อมูลได้</td></tr>';
     }
   }
 
@@ -144,13 +198,3 @@
     document.getElementById('logoutBtn').style.display = isVip ? 'block'        : 'none';
     document.getElementById('vipBadge').style.display  = isVip ? 'inline-block' : 'none';
     loadRates(isVip);
-  });
-
-  setInterval(async () => {
-    const { data: { session } } = await sb.auth.getSession();
-    loadRates(!!session);
-  }, 60000);
-</script>
-
-</body>
-</html>
