@@ -168,8 +168,8 @@
         const cols = parseCSVRow(row);
         if (cols.length < 14) return;
         const currency = cols[0]?.trim();
-        const buy  = parseFloat(cols[13]);
-        const sell = parseFloat(cols[14]);
+        const buy  = parseFloat(cols[12]);
+        const sell = parseFloat(cols[13]);
         if (!currency || isNaN(buy) || isNaN(sell)) return;
         const info = CURRENCY_INFO[currency] || { name: currency, flag: '🏳️' };
         const dec  = getDecimals(currency, buy);
