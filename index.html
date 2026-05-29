@@ -92,7 +92,7 @@
 <script>
   const SUPABASE_URL = 'https://rgyihmjdowaeoofqwpcp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_yKxRRNmq80FQirLEv2oJhw_w6lly-gX';
-  const PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs6JEWMlGmxBenrtg7NaHuNiegAFmOhDft1Yy5tQp15NmgsAyVtW9D9X8SU31bw4rqtn4WYmokjha8/pub?gid=0&single=true&output=csv';
+  const PUBLIC_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs6JEWMlGmxBenrtg7NaHuNiegAFmOhDft1Yy5tQp15NmgsAyVtW9D9X8SU31bw4rqtn4WYmokjha8/pub?gid=0&single=true&output=csv';
   const VIP_CSV = PUBLIC_CSV;
 
   const CURRENCY_INFO = {
@@ -141,6 +141,18 @@
     return 2;
   }
 
+  function parseCSVRow(row) {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let c of row) {
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    cols.push(cur.trim());
+    return cols;
+  }
+
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -153,7 +165,7 @@
       const tbody = document.getElementById('rateTable');
       tbody.innerHTML = '';
       rows.forEach(row => {
-        const cols = row.split(',');
+        const cols = parseCSVRow(row);
         if (cols.length < 14) return;
         const currency = cols[0]?.trim();
         const buy  = parseFloat(cols[13]);
@@ -198,3 +210,13 @@
     document.getElementById('logoutBtn').style.display = isVip ? 'block'        : 'none';
     document.getElementById('vipBadge').style.display  = isVip ? 'inline-block' : 'none';
     loadRates(isVip);
+  });
+
+  setInterval(async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    loadRates(!!session);
+  }, 60000);
+</script>
+
+</body>
+</html>
