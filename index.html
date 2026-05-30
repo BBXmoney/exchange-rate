@@ -157,6 +157,16 @@
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function loadRates(isVip) {
+    const now = new Date();
+    const thai = new Date(now.toLocaleString('en-US', {timeZone: 'Asia/Bangkok'}));
+    const hour = thai.getHours();
+    if (hour < 8 || hour >= 22) {
+      document.getElementById('rateTable').innerHTML =
+        '<tr><td colspan="5" style="padding:20px;color:#888;text-align:center">⏰ ร้านปิดแล้ว<br>เปิดทำการ 08:00 - 22:00 น.</td></tr>';
+      document.getElementById('updated').textContent = 'นอกเวลาทำการ';
+      document.getElementById('loginBox').style.display = 'none';
+      return;
+    }
     const url = isVip ? VIP_CSV : PUBLIC_CSV;
     try {
       const res = await fetch(url);
