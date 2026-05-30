@@ -47,6 +47,35 @@
     #logoutBtn { display: block; margin: 0 auto 16px; padding: 8px 24px;
                  background: #ef4444; color: white; border: none;
                  border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+
+    /* Info Box */
+    .info-box {
+      width: 95%; max-width: 700px; margin: 0 auto 20px;
+      background: white; border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;
+    }
+    .info-header {
+      background: #1a7a1a; color: white;
+      padding: 10px 16px; font-weight: bold; font-size: 1rem;
+    }
+    .info-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 0.95rem;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .icon { font-size: 1.3rem; width: 28px; text-align: center; }
+    .info-row a { color: #1a7a1a; text-decoration: none; font-weight: 500; }
+    .info-row a:hover { text-decoration: underline; }
+    .qr-section {
+      text-align: center; padding: 16px;
+      border-top: 1px solid #eee;
+    }
+    .qr-section p { color: #555; font-size: 0.9rem; margin-bottom: 10px; }
+    .qr-section img {
+      width: 160px; height: 160px;
+      border: 3px solid #1a7a1a; border-radius: 10px;
+    }
+
     footer { text-align: center; padding: 20px; color: #777; font-size: 0.82rem; }
   </style>
 </head>
@@ -86,6 +115,33 @@
 </div>
 
 <button id="logoutBtn" style="display:none" onclick="logout()">ออกจากระบบ</button>
+
+<!-- ข้อมูลร้านและติดต่อ (อยู่ใต้ VIP Login) -->
+<div class="info-box">
+  <div class="info-header">🏪 ข้อมูลร้านและติดต่อ</div>
+  <div class="info-row">
+    <span class="icon">🕐</span>
+    <span>เวลาทำการ: <strong>จันทร์ - อาทิตย์ 08:00 - 22:00 น.</strong></span>
+  </div>
+  <div class="info-row">
+    <span class="icon">💚</span>
+    <span>Line Official: <a href="https://lin.ee/SeZjNEE" target="_blank">@bbxmoney</a></span>
+  </div>
+  <div class="info-row">
+    <span class="icon">📞</span>
+    <span>โทร: <a href="tel:0809004451">080-900-4451</a></span>
+  </div>
+  <div class="info-row">
+    <span class="icon">💬</span>
+    <span>WeChat: <strong>s-poonika</strong></span>
+  </div>
+  <div class="qr-section">
+    <p>สแกน QR Code เพื่อเพิ่มเพื่อนใน Line</p>
+    <a href="https://lin.ee/SeZjNEE" target="_blank">
+      <img src="line_oa_chat_690530_181326_group_0.png" alt="Line QR Code BBXmoney">
+    </a>
+  </div>
+</div>
 
 <footer>© BB Money Exchange (BBX) | อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตอัตโนมัติ</footer>
 
