@@ -240,12 +240,16 @@
         if (!currency || isNaN(buy) || isNaN(sell)) return;
         if (!lastUpdate) lastUpdate = cols[2] || '';
         const info = CURRENCY_INFO[currency] || { name: currency, flag: '🏳️' };
+        // Column O (index 14) can hold an override display label,
+        // e.g. "USD (50-100)" / "USD (5-20)" for split denomination rows.
+        const displayLabel = cols[14]?.trim();
+        const displayName  = displayLabel || info.name;
         const dec  = getDecimals(currency, buy);
         tbody.innerHTML += `
           <tr>
             <td class="flag">${info.flag}</td>
             <td><strong>${currency}</strong></td>
-            <td>${info.name}</td>
+            <td>${displayName}</td>
             <td class="buy">${buy.toFixed(dec)}</td>
             <td class="sell">${sell.toFixed(dec)}</td>
           </tr>`;
