@@ -5,6 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>อัตราแลกเงินวันนี้ - BB Money Exchange | BBX</title>
   <meta name="description" content="BB Money Exchange (BBX) อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตล่าสุด USD GBP EUR JPY และอื่นๆ">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+
+  <!-- Add to Home Screen: use shop logo as the icon on iOS / Android -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a7a1a">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BBX">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="BBX">
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="อัตราแลกเงินวันนี้ - BB Money Exchange | BBX">
+  <meta property="og:description" content="BBX — อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดต Real Time พร้อมเครื่องคำนวณแลกเงิน">
+  <meta property="og:image" content="https://bbxmoney.github.io/exchange-rate/bb_logo-removebg-circle.png">
+  <meta property="og:url" content="https://bbxmoney.github.io/exchange-rate/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="อัตราแลกเงินวันนี้ - BB Money Exchange | BBX">
+  <meta name="twitter:description" content="BBX — อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดต Real Time">
+  <meta name="twitter:image" content="https://bbxmoney.github.io/exchange-rate/bb_logo-removebg-circle.png">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,6 +57,17 @@
     tr:hover td { background: #f0f8f0; }
     .buy  { color: #16a34a; font-weight: bold; }
     .sell { color: #dc2626; font-weight: bold; }
+    .trend { font-size: 0.75rem; margin-left: 4px; font-weight: normal; }
+    .trend-up { color: #16a34a; }
+    .trend-down { color: #dc2626; }
+    .trend-same { color: #999; }
+
+    .disclaimer {
+      width: 95%; max-width: 700px; margin: -8px auto 20px;
+      background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412;
+      padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; text-align: center;
+    }
+
     #loginBox { width: 90%; max-width: 380px; margin: 20px auto;
                 background: white; border-radius: 12px; padding: 28px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
@@ -44,11 +80,15 @@
                        border-radius: 8px; font-size: 1rem; cursor: pointer; }
     #loginBox button:hover { background: #145e14; }
     #errorMsg { color: #ef4444; font-size: 0.88rem; margin-top: 8px; min-height: 20px; }
+    #forgotLink { display: inline-block; margin-top: 10px; font-size: 0.85rem; color: #1a7a1a; text-decoration: none; cursor: pointer; }
+    #forgotLink:hover { text-decoration: underline; }
+    #closedNote { display: none; color: #dc2626; font-size: 0.85rem; margin-top: 4px; }
+    #loginBox.closed input, #loginBox.closed button { opacity: 0.5; pointer-events: none; }
     #logoutBtn { display: block; margin: 0 auto 16px; padding: 8px 24px;
                  background: #ef4444; color: white; border: none;
                  border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
 
-    /* Info Box */
+    /* Info Box (shared style for contact / converter) */
     .info-box {
       width: 95%; max-width: 700px; margin: 0 auto 20px;
       background: white; border-radius: 10px;
@@ -75,6 +115,23 @@
       width: 160px; height: 160px;
       border: 3px solid #1a7a1a; border-radius: 10px;
     }
+    .map-embed { padding: 0 16px 16px; }
+    .map-embed iframe { width: 100%; height: 200px; border: 0; border-radius: 10px; }
+
+    /* Converter */
+    #converterBox .info-row { flex-wrap: wrap; }
+    #converterBox input, #converterBox select {
+      flex: 1; min-width: 110px; padding: 9px 10px;
+      border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem;
+    }
+    #convResult { justify-content: center; font-weight: bold; font-size: 1.05rem; color: #1a7a1a; text-align: center; }
+
+    .share-row { text-align: center; padding: 6px 20px 20px; }
+    .share-btn { display: inline-block; margin: 4px 6px; padding: 8px 18px;
+                 border-radius: 20px; color: white !important; text-decoration: none;
+                 font-size: 0.85rem; font-weight: 500; }
+    .share-btn.line { background: #06C755; }
+    .share-btn.fb { background: #1877F2; }
 
     footer { text-align: center; padding: 20px; color: #777; font-size: 0.82rem; }
   </style>
@@ -105,6 +162,24 @@
   </tbody>
 </table>
 
+<p class="disclaimer">⚠️ อัตราแลกเปลี่ยนอาจเปลี่ยนแปลงโดยไม่แจ้งล่วงหน้า กรุณาโทรสอบถามและยืนยันอัตรากับร้านก่อนทำธุรกรรมจำนวนมาก</p>
+
+<!-- เครื่องคำนวณแลกเงิน -->
+<div class="info-box" id="converterBox">
+  <div class="info-header">🧮 คำนวณแลกเงิน</div>
+  <div class="info-row">
+    <input type="number" id="convAmount" placeholder="จำนวนเงินต่างประเทศ" min="0">
+    <select id="convCurrency"><option value="">กำลังโหลด...</option></select>
+  </div>
+  <div class="info-row">
+    <select id="convType">
+      <option value="sell">ร้านขาย (คุณซื้อเงินต่างประเทศ)</option>
+      <option value="buy">ร้านรับซื้อ (คุณขายเงินต่างประเทศ)</option>
+    </select>
+  </div>
+  <div class="info-row" id="convResult">กรอกจำนวนเงินเพื่อคำนวณ</div>
+</div>
+
 <div id="loginBox">
   <h2>🔐 สมาชิก VIP</h2>
   <p>Login เพื่อดูอัตราพิเศษสำหรับสมาชิก</p>
@@ -112,6 +187,8 @@
   <input type="password" id="password" placeholder="Password">
   <button onclick="login()">เข้าสู่ระบบ</button>
   <p id="errorMsg"></p>
+  <a id="forgotLink" onclick="forgotPassword()">ลืมรหัสผ่าน?</a>
+  <p id="closedNote">⏰ ระบบ VIP ปิดให้บริการนอกเวลาทำการ (08:00 - 22:00 น.)</p>
 </div>
 
 <button id="logoutBtn" style="display:none" onclick="logout()">ออกจากระบบ</button>
@@ -135,12 +212,24 @@
     <span class="icon">💬</span>
     <span>WeChat: <strong>s-poonika</strong></span>
   </div>
+  <div class="info-row">
+    <span class="icon">📍</span>
+    <span>ที่อยู่: <a href="https://maps.app.goo.gl/X4Wx7w9gNqkmk6dv9" target="_blank">Banbueng Money Exchange รับแลกเงินตราต่างประเทศ (เปิดใน Google Maps)</a></span>
+  </div>
+  <div class="map-embed">
+    <iframe src="https://www.google.com/maps?q=13.3026057,101.1193772&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="แผนที่ร้าน BBX Money Exchange"></iframe>
+  </div>
   <div class="qr-section">
     <p>สแกน QR Code เพื่อเพิ่มเพื่อนใน Line</p>
     <a href="https://lin.ee/SeZjNEE" target="_blank">
       <img src="line_oa_chat_690530_181326_group_0.png" alt="Line QR Code BBXmoney">
     </a>
   </div>
+</div>
+
+<div class="share-row">
+  <a class="share-btn line" target="_blank" href="https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fbbxmoney.github.io%2Fexchange-rate%2F">แชร์ผ่าน Line</a>
+  <a class="share-btn fb" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fbbxmoney.github.io%2Fexchange-rate%2F">แชร์ผ่าน Facebook</a>
 </div>
 
 <footer>© BB Money Exchange (BBX) | อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตอัตโนมัติ</footer>
@@ -150,6 +239,7 @@
   const SUPABASE_KEY = 'sb_publishable_yKxRRNmq80FQirLEv2oJhw_w6lly-gX';
   const PUBLIC_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs6JEWMlGmxBenrtg7NaHuNiegAFmOhDft1Yy5tQp15NmgsAyVtW9D9X8SU31bw4rqtn4WYmokjha8/pub?gid=0&single=true&output=csv';
   const VIP_CSV     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs6JEWMlGmxBenrtg7NaHuNiegAFmOhDft1Yy5tQp15NmgsAyVtW9D9X8SU31bw4rqtn4WYmokjha8/pub?gid=247377202&single=true&output=csv';
+  const PREV_RATES_KEY = 'bbx_prev_rates';
 
   const CURRENCY_INFO = {
     USD: { name:'ดอลลาร์สหรัฐ',        flag:'🇺🇸' },
@@ -187,6 +277,8 @@
     LAK: { name:'กีบ ลาว',               flag:'🇱🇦' },
   };
 
+  window.currentRates = [];
+
   function getDecimals(currency, value) {
     const five = ['JPY','KRW','VND','IDR','MMK','LAK'];
     const four = ['MOP','PHP','TWD','HKD'];
@@ -209,6 +301,42 @@
     return cols;
   }
 
+  function getTrend(cur, prev) {
+    if (prev === undefined || prev === null || isNaN(prev)) return { symbol: '', cls: '' };
+    if (cur > prev) return { symbol: '▲', cls: 'trend-up' };
+    if (cur < prev) return { symbol: '▼', cls: 'trend-down' };
+    return { symbol: '—', cls: 'trend-same' };
+  }
+
+  function populateConverterOptions() {
+    const sel = document.getElementById('convCurrency');
+    const prevVal = sel.value;
+    if (!window.currentRates.length) {
+      sel.innerHTML = '<option value="">ไม่มีข้อมูล</option>';
+      return;
+    }
+    sel.innerHTML = window.currentRates
+      .map(r => `<option value="${r.currency}">${r.currency} - ${r.name}</option>`)
+      .join('');
+    if (prevVal && window.currentRates.some(r => r.currency === prevVal)) sel.value = prevVal;
+    calcConvert();
+  }
+
+  function calcConvert() {
+    const amount = parseFloat(document.getElementById('convAmount').value);
+    const cur = document.getElementById('convCurrency').value;
+    const type = document.getElementById('convType').value;
+    const resEl = document.getElementById('convResult');
+    const rateObj = window.currentRates.find(r => r.currency === cur);
+    if (!rateObj || isNaN(amount) || amount <= 0) {
+      resEl.textContent = 'กรอกจำนวนเงินเพื่อคำนวณ';
+      return;
+    }
+    const rate = type === 'buy' ? rateObj.buy : rateObj.sell;
+    const total = amount * rate;
+    resEl.textContent = `${amount.toLocaleString()} ${cur} = ${total.toLocaleString(undefined,{maximumFractionDigits:2})} บาท (อัตรา ${rate})`;
+  }
+
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -216,28 +344,46 @@
     const now = new Date();
     const thai = new Date(now.toLocaleString('en-US', {timeZone: 'Asia/Bangkok'}));
     const hour = thai.getHours();
+    const loginBox = document.getElementById('loginBox');
+    const closedNote = document.getElementById('closedNote');
     if (hour < 8 || hour >= 22) {
       document.getElementById('rateTable').innerHTML =
         '<tr><td colspan="5" style="padding:20px;color:#888;text-align:center">⏰ ร้านปิดแล้ว<br>เปิดทำการ 08:00 - 22:00 น.</td></tr>';
       document.getElementById('updated').textContent = 'นอกเวลาทำการ';
-      document.getElementById('loginBox').style.display = 'none';
+      // Keep the VIP login form visible (so an already-logged-in member isn't confused
+      // by it vanishing) but disable it and explain why, instead of hiding it outright.
+      if (!isVip) {
+        loginBox.classList.add('closed');
+        closedNote.style.display = 'block';
+      }
       return;
     }
+    loginBox.classList.remove('closed');
+    closedNote.style.display = 'none';
     const url = isVip ? VIP_CSV : PUBLIC_CSV;
     try {
       const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const text = await res.text();
       const rows = text.trim().split('\n').slice(1);
       const tbody = document.getElementById('rateTable');
       tbody.innerHTML = '';
       let lastUpdate = '';
+      let skippedRows = 0;
+
+      let prevRates = {};
+      try { prevRates = JSON.parse(localStorage.getItem(PREV_RATES_KEY)) || {}; } catch(e) { prevRates = {}; }
+      const newRates = {};
+      window.currentRates = [];
+
       rows.forEach(row => {
+        if (!row.trim()) return;
         const cols = parseCSVRow(row);
-        if (cols.length < 13) return;
+        if (cols.length < 13) { skippedRows++; return; }
         const currency = cols[0]?.trim();
         const buy  = parseFloat(cols[12]);
         const sell = parseFloat(cols[13]);
-        if (!currency || isNaN(buy) || isNaN(sell)) return;
+        if (!currency || isNaN(buy) || isNaN(sell)) { skippedRows++; return; }
         if (!lastUpdate) lastUpdate = cols[2] || '';
         const info = CURRENCY_INFO[currency] || { name: currency, flag: '🏳️' };
         // Column O (index 14) can hold an override display label,
@@ -245,20 +391,48 @@
         const displayLabel = cols[14]?.trim();
         const displayName  = displayLabel || info.name;
         const dec  = getDecimals(currency, buy);
+
+        newRates[currency] = { buy, sell };
+        window.currentRates.push({ currency, name: displayName, buy, sell });
+
+        const prev = prevRates[currency];
+        const trendBuy  = getTrend(buy,  prev?.buy);
+        const trendSell = getTrend(sell, prev?.sell);
+
         tbody.innerHTML += `
           <tr>
             <td class="flag">${info.flag}</td>
             <td><strong>${currency}</strong></td>
             <td>${displayName}</td>
-            <td class="buy">${buy.toFixed(dec)}</td>
-            <td class="sell">${sell.toFixed(dec)}</td>
+            <td class="buy">${buy.toFixed(dec)}<span class="trend ${trendBuy.cls}">${trendBuy.symbol}</span></td>
+            <td class="sell">${sell.toFixed(dec)}<span class="trend ${trendSell.cls}">${trendSell.symbol}</span></td>
           </tr>`;
       });
-      document.getElementById('updated').textContent =
-        `${isVip ? '⭐ เรทพิเศษ VIP' : 'เรทปกติ'} | อัปเดตล่าสุด: ${lastUpdate}`;
+
+      try { localStorage.setItem(PREV_RATES_KEY, JSON.stringify(newRates)); } catch(e) {}
+
+      if (window.currentRates.length === 0) {
+        // The sheet returned data but none of it matched the expected column
+        // layout (currency / buy at col 13 / sell at col 14) — surface this
+        // clearly instead of silently rendering an empty table.
+        tbody.innerHTML =
+          '<tr><td colspan="5" style="padding:20px;color:#c2410c;text-align:center">⚠️ ไม่พบข้อมูลอัตราแลกเปลี่ยนที่อ่านได้<br>โครงสร้างชีทอาจมีการเปลี่ยนแปลง กรุณาตรวจสอบ</td></tr>';
+        document.getElementById('updated').textContent = 'ไม่สามารถอ่านข้อมูลอัตราได้';
+        console.warn('BBX: parsed 0 valid rate rows out of', rows.length, '(skipped ' + skippedRows + '). Check CSV column layout.');
+      } else {
+        document.getElementById('updated').textContent =
+          `${isVip ? '⭐ เรทพิเศษ VIP' : 'เรทปกติ'} | อัปเดตล่าสุด: ${lastUpdate}`;
+        if (skippedRows > 0) {
+          console.warn('BBX: skipped', skippedRows, 'malformed row(s) while parsing rates CSV.');
+        }
+      }
+
+      populateConverterOptions();
     } catch(e) {
       document.getElementById('rateTable').innerHTML =
-        '<tr><td colspan="5">ไม่สามารถโหลดข้อมูลได้</td></tr>';
+        '<tr><td colspan="5" style="padding:20px;color:#c2410c;text-align:center">⚠️ ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง</td></tr>';
+      document.getElementById('updated').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+      console.error('BBX: failed to load rates —', e);
     }
   }
 
@@ -275,6 +449,25 @@
     location.reload();
   }
 
+  async function forgotPassword() {
+    const email = document.getElementById('email').value.trim();
+    const errorEl = document.getElementById('errorMsg');
+    if (!email) {
+      errorEl.textContent = 'กรุณากรอกอีเมลในช่องด้านบนก่อนกดลืมรหัสผ่าน';
+      return;
+    }
+    errorEl.style.color = '#1a7a1a';
+    errorEl.textContent = 'กำลังส่งลิงก์รีเซ็ตรหัสผ่าน...';
+    const { error } = await sb.auth.resetPasswordForEmail(email);
+    if (error) {
+      errorEl.style.color = '#ef4444';
+      errorEl.textContent = 'เกิดข้อผิดพลาด: ' + error.message;
+    } else {
+      errorEl.style.color = '#1a7a1a';
+      errorEl.textContent = 'ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว กรุณาตรวจสอบกล่องจดหมาย';
+    }
+  }
+
   sb.auth.onAuthStateChange((event, session) => {
     const isVip = !!session;
     document.getElementById('loginBox').style.display  = isVip ? 'none'         : 'block';
@@ -282,6 +475,10 @@
     document.getElementById('vipBadge').style.display  = isVip ? 'inline-block' : 'none';
     loadRates(isVip);
   });
+
+  document.getElementById('convAmount').addEventListener('input', calcConvert);
+  document.getElementById('convCurrency').addEventListener('change', calcConvert);
+  document.getElementById('convType').addEventListener('change', calcConvert);
 
   setInterval(async () => {
     const { data: { session } } = await sb.auth.getSession();
