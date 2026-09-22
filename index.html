@@ -45,6 +45,14 @@
     .badge { display: inline-block; background: #fbbf24; color: #333;
              padding: 3px 12px; border-radius: 20px; font-size: 0.85rem;
              margin-top: 8px; font-weight: bold; }
+    .lang-switch { margin-top: 12px; display: flex; justify-content: center; gap: 6px; }
+    .lang-btn {
+      background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.5);
+      padding: 4px 12px; border-radius: 16px; font-size: 0.78rem; cursor: pointer;
+      font-weight: 600; letter-spacing: 0.3px;
+    }
+    .lang-btn:hover { background: rgba(255,255,255,0.28); }
+    .lang-btn.active { background: white; color: #1a7a1a; border-color: white; }
     .updated { text-align: center; padding: 10px; color: #555; font-size: 0.9rem; }
     table { width: 95%; max-width: 700px; margin: 10px auto 20px;
             border-collapse: collapse; background: white;
@@ -141,8 +149,13 @@
 <header>
   <img src="bb_logo-removebg-circle.png" alt="BBX Logo">
   <h1>BB Money Exchange</h1>
-  <p>BBX — อัตราแลกเงินวันนี้ อัปเดต Real Time</p>
+  <p id="tagline">BBX — อัตราแลกเงินวันนี้ อัปเดต Real Time</p>
   <span id="vipBadge" class="badge" style="display:none">⭐ สมาชิก VIP</span>
+  <div class="lang-switch">
+    <button type="button" class="lang-btn" data-lang="th" onclick="setLanguage('th')">ไทย</button>
+    <button type="button" class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+    <button type="button" class="lang-btn" data-lang="zh" onclick="setLanguage('zh')">中文</button>
+  </div>
 </header>
 
 <p class="updated" id="updated">กำลังโหลดข้อมูล...</p>
@@ -150,11 +163,11 @@
 <table>
   <thead>
     <tr>
-      <th>ธง</th>
-      <th>สกุลเงิน</th>
-      <th>ชื่อ</th>
-      <th>รับซื้อ</th>
-      <th>ขาย</th>
+      <th id="thFlag">ธง</th>
+      <th id="thCurrency">สกุลเงิน</th>
+      <th id="thName">ชื่อ</th>
+      <th id="thBuy">รับซื้อ</th>
+      <th id="thSell">ขาย</th>
     </tr>
   </thead>
   <tbody id="rateTable">
@@ -162,30 +175,30 @@
   </tbody>
 </table>
 
-<p class="disclaimer">⚠️ อัตราแลกเปลี่ยนอาจเปลี่ยนแปลงโดยไม่แจ้งล่วงหน้า กรุณาโทรสอบถามและยืนยันอัตรากับร้านก่อนทำธุรกรรมจำนวนมาก</p>
+<p class="disclaimer" id="disclaimerText">⚠️ อัตราแลกเปลี่ยนอาจเปลี่ยนแปลงโดยไม่แจ้งล่วงหน้า กรุณาโทรสอบถามและยืนยันอัตรากับร้านก่อนทำธุรกรรมจำนวนมาก</p>
 
 <!-- เครื่องคำนวณแลกเงิน -->
 <div class="info-box" id="converterBox">
-  <div class="info-header">🧮 คำนวณแลกเงิน</div>
+  <div class="info-header" id="convHeader">🧮 คำนวณแลกเงิน</div>
   <div class="info-row">
     <input type="number" id="convAmount" placeholder="จำนวนเงินต่างประเทศ" min="0">
     <select id="convCurrency"><option value="">กำลังโหลด...</option></select>
   </div>
   <div class="info-row">
     <select id="convType">
-      <option value="sell">ร้านขาย (คุณซื้อเงินต่างประเทศ)</option>
-      <option value="buy">ร้านรับซื้อ (คุณขายเงินต่างประเทศ)</option>
+      <option value="sell" id="convTypeSell">ร้านขาย (คุณซื้อเงินต่างประเทศ)</option>
+      <option value="buy" id="convTypeBuy">ร้านรับซื้อ (คุณขายเงินต่างประเทศ)</option>
     </select>
   </div>
   <div class="info-row" id="convResult">กรอกจำนวนเงินเพื่อคำนวณ</div>
 </div>
 
 <div id="loginBox">
-  <h2>🔐 สมาชิก VIP</h2>
-  <p>Login เพื่อดูอัตราพิเศษสำหรับสมาชิก</p>
+  <h2 id="loginHeading">🔐 สมาชิก VIP</h2>
+  <p id="loginSubtitle">Login เพื่อดูอัตราพิเศษสำหรับสมาชิก</p>
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Password">
-  <button onclick="login()">เข้าสู่ระบบ</button>
+  <button id="loginBtn" onclick="login()">เข้าสู่ระบบ</button>
   <p id="errorMsg"></p>
   <a id="forgotLink" onclick="forgotPassword()">ลืมรหัสผ่าน?</a>
   <p id="closedNote">⏰ ระบบ VIP ปิดให้บริการนอกเวลาทำการ (08:00 - 22:00 น.)</p>
@@ -195,32 +208,33 @@
 
 <!-- ข้อมูลร้านและติดต่อ (อยู่ใต้ VIP Login) -->
 <div class="info-box">
-  <div class="info-header">🏪 ข้อมูลร้านและติดต่อ</div>
+  <div class="info-header" id="infoHeader">🏪 ข้อมูลร้านและติดต่อ</div>
   <div class="info-row">
     <span class="icon">🕐</span>
-    <span>เวลาทำการ: <strong>จันทร์ - อาทิตย์ 08:00 - 22:00 น.</strong></span>
+    <span id="hoursLabel">เวลาทำการ:</span> <strong id="hoursValue">จันทร์ - อาทิตย์ 08:00 - 22:00 น.</strong>
   </div>
   <div class="info-row">
     <span class="icon">💚</span>
-    <span>Line Official: <a href="https://lin.ee/SeZjNEE" target="_blank">@bbxmoney</a></span>
+    <span id="lineLabel">Line Official:</span> <a href="https://lin.ee/SeZjNEE" target="_blank">@bbxmoney</a>
   </div>
   <div class="info-row">
     <span class="icon">📞</span>
-    <span>โทร: <a href="tel:0809004451">080-900-4451</a></span>
+    <span id="phoneLabel">โทร:</span> <a href="tel:0809004451">080-900-4451</a>
   </div>
   <div class="info-row">
     <span class="icon">💬</span>
-    <span>WeChat: <strong>s-poonika</strong></span>
+    <span>WeChat:</span> <strong>s-poonika</strong>
   </div>
   <div class="info-row">
     <span class="icon">📍</span>
-    <span>ที่อยู่: <a href="https://maps.app.goo.gl/X4Wx7w9gNqkmk6dv9" target="_blank">Banbueng Money Exchange รับแลกเงินตราต่างประเทศ (เปิดใน Google Maps)</a></span>
+    <span id="addressLabel">ที่อยู่:</span>
+    <a href="https://maps.app.goo.gl/X4Wx7w9gNqkmk6dv9" target="_blank">Banbueng Money Exchange รับแลกเงินตราต่างประเทศ <span id="addressLinkSuffix">(เปิดใน Google Maps)</span></a>
   </div>
   <div class="map-embed">
     <iframe src="https://www.google.com/maps?q=Banbueng+Money+Exchange+%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%81%E0%B9%80%E0%B8%87%E0%B8%B4%E0%B8%99%E0%B8%95%E0%B8%A3%E0%B8%B2%E0%B8%95%E0%B9%88%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%97%E0%B8%A8&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="แผนที่ร้าน BBX Money Exchange"></iframe>
   </div>
   <div class="qr-section">
-    <p>สแกน QR Code เพื่อเพิ่มเพื่อนใน Line</p>
+    <p id="qrCaption">สแกน QR Code เพื่อเพิ่มเพื่อนใน Line</p>
     <a href="https://lin.ee/SeZjNEE" target="_blank">
       <img src="line_oa_chat_690530_181326_group_0.png" alt="Line QR Code BBXmoney">
     </a>
@@ -228,11 +242,11 @@
 </div>
 
 <div class="share-row">
-  <a class="share-btn line" target="_blank" href="https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fbbxmoney.github.io%2Fexchange-rate%2F">แชร์ผ่าน Line</a>
-  <a class="share-btn fb" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fbbxmoney.github.io%2Fexchange-rate%2F">แชร์ผ่าน Facebook</a>
+  <a class="share-btn line" id="shareLine" target="_blank" href="https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fbbxmoney.github.io%2Fexchange-rate%2F">แชร์ผ่าน Line</a>
+  <a class="share-btn fb" id="shareFb" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fbbxmoney.github.io%2Fexchange-rate%2F">แชร์ผ่าน Facebook</a>
 </div>
 
-<footer>© BB Money Exchange (BBX) | อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตอัตโนมัติ</footer>
+<footer id="footerText">© BB Money Exchange (BBX) | อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตอัตโนมัติ</footer>
 
 <script>
   const SUPABASE_URL = 'https://rgyihmjdowaeoofqwpcp.supabase.co';
@@ -240,41 +254,201 @@
   const PUBLIC_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs6JEWMlGmxBenrtg7NaHuNiegAFmOhDft1Yy5tQp15NmgsAyVtW9D9X8SU31bw4rqtn4WYmokjha8/pub?gid=0&single=true&output=csv';
   const VIP_CSV     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs6JEWMlGmxBenrtg7NaHuNiegAFmOhDft1Yy5tQp15NmgsAyVtW9D9X8SU31bw4rqtn4WYmokjha8/pub?gid=247377202&single=true&output=csv';
   const PREV_RATES_KEY = 'bbx_prev_rates';
+  const LANG_KEY = 'bbx_lang';
+
+  // ---- i18n ----------------------------------------------------------
+  const I18N = {
+    th: {
+      pageTitle: 'อัตราแลกเงินวันนี้ - BB Money Exchange | BBX',
+      tagline: 'BBX — อัตราแลกเงินวันนี้ อัปเดต Real Time',
+      vipBadge: '⭐ สมาชิก VIP',
+      thFlag: 'ธง', thCurrency: 'สกุลเงิน', thName: 'ชื่อ', thBuy: 'รับซื้อ', thSell: 'ขาย',
+      loadingInitial: 'กำลังโหลดข้อมูล...',
+      loadingRow: 'กำลังโหลด...',
+      disclaimer: '⚠️ อัตราแลกเปลี่ยนอาจเปลี่ยนแปลงโดยไม่แจ้งล่วงหน้า กรุณาโทรสอบถามและยืนยันอัตรากับร้านก่อนทำธุรกรรมจำนวนมาก',
+      convHeader: '🧮 คำนวณแลกเงิน',
+      convAmountPlaceholder: 'จำนวนเงินต่างประเทศ',
+      convLoading: 'กำลังโหลด...',
+      convNoData: 'ไม่มีข้อมูล',
+      convTypeSell: 'ร้านขาย (คุณซื้อเงินต่างประเทศ)',
+      convTypeBuy: 'ร้านรับซื้อ (คุณขายเงินต่างประเทศ)',
+      convDefault: 'กรอกจำนวนเงินเพื่อคำนวณ',
+      convResult: '{amount} {cur} = {total} บาท (อัตรา {rate})',
+      loginHeading: '🔐 สมาชิก VIP',
+      loginSubtitle: 'Login เพื่อดูอัตราพิเศษสำหรับสมาชิก',
+      loginBtn: 'เข้าสู่ระบบ',
+      forgotLink: 'ลืมรหัสผ่าน?',
+      closedNote: '⏰ ระบบ VIP ปิดให้บริการนอกเวลาทำการ (08:00 - 22:00 น.)',
+      logoutBtn: 'ออกจากระบบ',
+      loginError: 'Email หรือ Password ไม่ถูกต้อง',
+      forgotNeedEmail: 'กรุณากรอกอีเมลในช่องด้านบนก่อนกดลืมรหัสผ่าน',
+      forgotSending: 'กำลังส่งลิงก์รีเซ็ตรหัสผ่าน...',
+      forgotErrorPrefix: 'เกิดข้อผิดพลาด: ',
+      forgotSuccess: 'ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว กรุณาตรวจสอบกล่องจดหมาย',
+      infoHeader: '🏪 ข้อมูลร้านและติดต่อ',
+      hoursLabel: 'เวลาทำการ:',
+      hoursValue: 'จันทร์ - อาทิตย์ 08:00 - 22:00 น.',
+      lineLabel: 'Line Official:',
+      phoneLabel: 'โทร:',
+      addressLabel: 'ที่อยู่:',
+      addressLinkSuffix: '(เปิดใน Google Maps)',
+      qrCaption: 'สแกน QR Code เพื่อเพิ่มเพื่อนใน Line',
+      shareLine: 'แชร์ผ่าน Line',
+      shareFb: 'แชร์ผ่าน Facebook',
+      footerText: '© BB Money Exchange (BBX) | อัตราแลกเปลี่ยนเงินตราต่างประเทศ อัปเดตอัตโนมัติ',
+      closedTable: '⏰ ร้านปิดแล้ว<br>เปิดทำการ 08:00 - 22:00 น.',
+      closedUpdated: 'นอกเวลาทำการ',
+      vipRateLabel: '⭐ เรทพิเศษ VIP',
+      normalRateLabel: 'เรทปกติ',
+      lastUpdatedPrefix: 'อัปเดตล่าสุด: ',
+      emptyDataTable: '⚠️ ไม่พบข้อมูลอัตราแลกเปลี่ยนที่อ่านได้<br>โครงสร้างชีทอาจมีการเปลี่ยนแปลง กรุณาตรวจสอบ',
+      emptyDataUpdated: 'ไม่สามารถอ่านข้อมูลอัตราได้',
+      loadFailTable: '⚠️ ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+      loadFailUpdated: 'โหลดข้อมูลไม่สำเร็จ',
+    },
+    en: {
+      pageTitle: "Today's Exchange Rates - BB Money Exchange | BBX",
+      tagline: "BBX — Today's Exchange Rates, Updated in Real Time",
+      vipBadge: '⭐ VIP Member',
+      thFlag: 'Flag', thCurrency: 'Currency', thName: 'Name', thBuy: 'Buy', thSell: 'Sell',
+      loadingInitial: 'Loading...',
+      loadingRow: 'Loading...',
+      disclaimer: '⚠️ Exchange rates are subject to change without notice. Please call to confirm rates before large transactions.',
+      convHeader: '🧮 Currency Converter',
+      convAmountPlaceholder: 'Foreign currency amount',
+      convLoading: 'Loading...',
+      convNoData: 'No data',
+      convTypeSell: 'We Sell (you buy foreign currency)',
+      convTypeBuy: 'We Buy (you sell foreign currency)',
+      convDefault: 'Enter an amount to calculate',
+      convResult: '{amount} {cur} = {total} THB (rate {rate})',
+      loginHeading: '🔐 VIP Member',
+      loginSubtitle: 'Log in to view special member rates',
+      loginBtn: 'Log In',
+      forgotLink: 'Forgot password?',
+      closedNote: '⏰ VIP login is unavailable outside business hours (08:00 - 22:00)',
+      logoutBtn: 'Log Out',
+      loginError: 'Incorrect email or password',
+      forgotNeedEmail: 'Please enter your email above before requesting a reset',
+      forgotSending: 'Sending password reset link...',
+      forgotErrorPrefix: 'Error: ',
+      forgotSuccess: 'Password reset link sent. Please check your inbox.',
+      infoHeader: '🏪 Store Info & Contact',
+      hoursLabel: 'Business hours:',
+      hoursValue: 'Mon - Sun 08:00 - 22:00',
+      lineLabel: 'Line Official:',
+      phoneLabel: 'Phone:',
+      addressLabel: 'Address:',
+      addressLinkSuffix: '(Open in Google Maps)',
+      qrCaption: 'Scan the QR code to add us on LINE',
+      shareLine: 'Share via LINE',
+      shareFb: 'Share via Facebook',
+      footerText: '© BB Money Exchange (BBX) | Foreign exchange rates, updated automatically',
+      closedTable: '⏰ Store is closed<br>Open 08:00 - 22:00',
+      closedUpdated: 'Outside business hours',
+      vipRateLabel: '⭐ VIP Special Rate',
+      normalRateLabel: 'Standard Rate',
+      lastUpdatedPrefix: 'Last updated: ',
+      emptyDataTable: '⚠️ No readable exchange rate data found<br>The sheet structure may have changed. Please check.',
+      emptyDataUpdated: 'Unable to read rate data',
+      loadFailTable: '⚠️ Failed to load data. Please try again.',
+      loadFailUpdated: 'Failed to load data',
+    },
+    zh: {
+      pageTitle: 'BB Money Exchange 今日汇率 | BBX',
+      tagline: 'BBX — 今日汇率，实时更新',
+      vipBadge: '⭐ VIP会员',
+      thFlag: '国旗', thCurrency: '货币', thName: '名称', thBuy: '买入', thSell: '卖出',
+      loadingInitial: '加载中...',
+      loadingRow: '加载中...',
+      disclaimer: '⚠️ 汇率可能随时变动，恕不另行通知。大额交易前请致电本店确认汇率。',
+      convHeader: '🧮 货币计算器',
+      convAmountPlaceholder: '外币金额',
+      convLoading: '加载中...',
+      convNoData: '无数据',
+      convTypeSell: '本店卖出（您购汇）',
+      convTypeBuy: '本店买入（您结汇）',
+      convDefault: '请输入金额进行计算',
+      convResult: '{amount} {cur} = {total} 泰铢（汇率 {rate}）',
+      loginHeading: '🔐 VIP会员',
+      loginSubtitle: '登录查看会员专属汇率',
+      loginBtn: '登录',
+      forgotLink: '忘记密码？',
+      closedNote: '⏰ 非营业时间（08:00-22:00）VIP登录不可用',
+      logoutBtn: '退出登录',
+      loginError: '邮箱或密码不正确',
+      forgotNeedEmail: '请先在上方输入邮箱后再点击忘记密码',
+      forgotSending: '正在发送密码重置链接...',
+      forgotErrorPrefix: '错误：',
+      forgotSuccess: '密码重置链接已发送，请查收邮箱。',
+      infoHeader: '🏪 门店信息与联系方式',
+      hoursLabel: '营业时间：',
+      hoursValue: '周一至周日 08:00 - 22:00',
+      lineLabel: 'Line Official:',
+      phoneLabel: '电话：',
+      addressLabel: '地址：',
+      addressLinkSuffix: '（在Google地图中打开）',
+      qrCaption: '扫描二维码添加LINE好友',
+      shareLine: '通过LINE分享',
+      shareFb: '通过Facebook分享',
+      footerText: '© BB Money Exchange (BBX) | 外汇汇率，自动更新',
+      closedTable: '⏰ 店铺已打烊<br>营业时间 08:00 - 22:00',
+      closedUpdated: '非营业时间',
+      vipRateLabel: '⭐ VIP特惠汇率',
+      normalRateLabel: '标准汇率',
+      lastUpdatedPrefix: '最后更新：',
+      emptyDataTable: '⚠️ 未找到可读取的汇率数据<br>表格结构可能已更改，请检查。',
+      emptyDataUpdated: '无法读取汇率数据',
+      loadFailTable: '⚠️ 加载数据失败，请重试。',
+      loadFailUpdated: '数据加载失败',
+    },
+  };
+
+  let currentLang = localStorage.getItem(LANG_KEY) || 'th';
+  let lastIsVip = false;
+
+  function t(key, vars) {
+    let str = (I18N[currentLang] && I18N[currentLang][key]) || I18N.th[key] || '';
+    if (vars) {
+      Object.keys(vars).forEach(k => { str = str.replace('{' + k + '}', vars[k]); });
+    }
+    return str;
+  }
 
   const CURRENCY_INFO = {
-    USD: { name:'ดอลลาร์สหรัฐ',        flag:'🇺🇸' },
-    GBP: { name:'ปอนด์สเตอร์ลิง',       flag:'🇬🇧' },
-    EUR: { name:'ยูโร',                  flag:'🇪🇺' },
-    CNY: { name:'หยวน จีน',             flag:'🇨🇳' },
-    TWD: { name:'ดอลลาร์ไต้หวัน',       flag:'🇹🇼' },
-    JPY: { name:'เยน ญี่ปุ่น',           flag:'🇯🇵' },
-    SGD: { name:'ดอลลาร์สิงคโปร์',      flag:'🇸🇬' },
-    HKD: { name:'ดอลลาร์ฮ่องกง',        flag:'🇭🇰' },
-    KRW: { name:'วอน เกาหลีใต้',        flag:'🇰🇷' },
-    MYR: { name:'ริงกิต มาเลเซีย',       flag:'🇲🇾' },
-    VND: { name:'ดอง เวียดนาม',          flag:'🇻🇳' },
-    INR: { name:'รูปี อินเดีย',           flag:'🇮🇳' },
-    AUD: { name:'ดอลลาร์ออสเตรเลีย',    flag:'🇦🇺' },
-    CHF: { name:'ฟรังก์ สวิส',           flag:'🇨🇭' },
-    NZD: { name:'ดอลลาร์นิวซีแลนด์',    flag:'🇳🇿' },
-    CAD: { name:'ดอลลาร์แคนาดา',        flag:'🇨🇦' },
-    DKK: { name:'โครน เดนมาร์ก',        flag:'🇩🇰' },
-    NOK: { name:'โครน นอร์เวย์',         flag:'🇳🇴' },
-    SEK: { name:'โครนา สวีเดน',          flag:'🇸🇪' },
-    RUB: { name:'รูเบิล รัสเซีย',         flag:'🇷🇺' },
-    OMR: { name:'เรียล โอมาน',           flag:'🇴🇲' },
-    AED: { name:'ดีแรห์ม UAE',           flag:'🇦🇪' },
-    QAR: { name:'เรียล กาตาร์',          flag:'🇶🇦' },
-    SAR: { name:'ริยัล ซาอุดีอาระเบีย',  flag:'🇸🇦' },
-    BHD: { name:'ดีนาร์ บาห์เรน',        flag:'🇧🇭' },
-    BND: { name:'ดอลลาร์บรูไน',          flag:'🇧🇳' },
-    KWD: { name:'ดีนาร์ คูเวต',          flag:'🇰🇼' },
-    IDR: { name:'รูเปีย อินโดนีเซีย',    flag:'🇮🇩' },
-    ZAR: { name:'แรนด์ แอฟริกาใต้',      flag:'🇿🇦' },
-    PHP: { name:'เปโซ ฟิลิปปินส์',       flag:'🇵🇭' },
-    MMK: { name:'จัต พม่า',              flag:'🇲🇲' },
-    MOP: { name:'ปาตากา มาเก๊า',         flag:'🇲🇴' },
-    LAK: { name:'กีบ ลาว',               flag:'🇱🇦' },
+    USD: { flag:'🇺🇸', name: { th:'ดอลลาร์สหรัฐ',        en:'US Dollar',            zh:'美元' } },
+    GBP: { flag:'🇬🇧', name: { th:'ปอนด์สเตอร์ลิง',       en:'British Pound',        zh:'英镑' } },
+    EUR: { flag:'🇪🇺', name: { th:'ยูโร',                  en:'Euro',                 zh:'欧元' } },
+    CNY: { flag:'🇨🇳', name: { th:'หยวน จีน',             en:'Chinese Yuan',         zh:'人民币' } },
+    TWD: { flag:'🇹🇼', name: { th:'ดอลลาร์ไต้หวัน',       en:'Taiwan Dollar',        zh:'新台币' } },
+    JPY: { flag:'🇯🇵', name: { th:'เยน ญี่ปุ่น',           en:'Japanese Yen',         zh:'日元' } },
+    SGD: { flag:'🇸🇬', name: { th:'ดอลลาร์สิงคโปร์',      en:'Singapore Dollar',     zh:'新加坡元' } },
+    HKD: { flag:'🇭🇰', name: { th:'ดอลลาร์ฮ่องกง',        en:'Hong Kong Dollar',     zh:'港元' } },
+    KRW: { flag:'🇰🇷', name: { th:'วอน เกาหลีใต้',        en:'South Korean Won',     zh:'韩元' } },
+    MYR: { flag:'🇲🇾', name: { th:'ริงกิต มาเลเซีย',       en:'Malaysian Ringgit',    zh:'马来西亚林吉特' } },
+    VND: { flag:'🇻🇳', name: { th:'ดอง เวียดนาม',          en:'Vietnamese Dong',      zh:'越南盾' } },
+    INR: { flag:'🇮🇳', name: { th:'รูปี อินเดีย',           en:'Indian Rupee',         zh:'印度卢比' } },
+    AUD: { flag:'🇦🇺', name: { th:'ดอลลาร์ออสเตรเลีย',    en:'Australian Dollar',    zh:'澳大利亚元' } },
+    CHF: { flag:'🇨🇭', name: { th:'ฟรังก์ สวิส',           en:'Swiss Franc',          zh:'瑞士法郎' } },
+    NZD: { flag:'🇳🇿', name: { th:'ดอลลาร์นิวซีแลนด์',    en:'New Zealand Dollar',   zh:'新西兰元' } },
+    CAD: { flag:'🇨🇦', name: { th:'ดอลลาร์แคนาดา',        en:'Canadian Dollar',      zh:'加拿大元' } },
+    DKK: { flag:'🇩🇰', name: { th:'โครน เดนมาร์ก',        en:'Danish Krone',         zh:'丹麦克朗' } },
+    NOK: { flag:'🇳🇴', name: { th:'โครน นอร์เวย์',         en:'Norwegian Krone',      zh:'挪威克朗' } },
+    SEK: { flag:'🇸🇪', name: { th:'โครนา สวีเดน',          en:'Swedish Krona',        zh:'瑞典克朗' } },
+    RUB: { flag:'🇷🇺', name: { th:'รูเบิล รัสเซีย',         en:'Russian Ruble',        zh:'俄罗斯卢布' } },
+    OMR: { flag:'🇴🇲', name: { th:'เรียล โอมาน',           en:'Omani Rial',           zh:'阿曼里亚尔' } },
+    AED: { flag:'🇦🇪', name: { th:'ดีแรห์ม UAE',           en:'UAE Dirham',           zh:'阿联酋迪拉姆' } },
+    QAR: { flag:'🇶🇦', name: { th:'เรียล กาตาร์',          en:'Qatari Riyal',         zh:'卡塔尔里亚尔' } },
+    SAR: { flag:'🇸🇦', name: { th:'ริยัล ซาอุดีอาระเบีย',  en:'Saudi Riyal',          zh:'沙特里亚尔' } },
+    BHD: { flag:'🇧🇭', name: { th:'ดีนาร์ บาห์เรน',        en:'Bahraini Dinar',       zh:'巴林第纳尔' } },
+    BND: { flag:'🇧🇳', name: { th:'ดอลลาร์บรูไน',          en:'Brunei Dollar',        zh:'文莱元' } },
+    KWD: { flag:'🇰🇼', name: { th:'ดีนาร์ คูเวต',          en:'Kuwaiti Dinar',        zh:'科威特第纳尔' } },
+    IDR: { flag:'🇮🇩', name: { th:'รูเปีย อินโดนีเซีย',    en:'Indonesian Rupiah',    zh:'印尼盾' } },
+    ZAR: { flag:'🇿🇦', name: { th:'แรนด์ แอฟริกาใต้',      en:'South African Rand',   zh:'南非兰特' } },
+    PHP: { flag:'🇵🇭', name: { th:'เปโซ ฟิลิปปินส์',       en:'Philippine Peso',      zh:'菲律宾比索' } },
+    MMK: { flag:'🇲🇲', name: { th:'จัต พม่า',              en:'Myanmar Kyat',         zh:'缅甸元' } },
+    MOP: { flag:'🇲🇴', name: { th:'ปาตากา มาเก๊า',         en:'Macanese Pataca',      zh:'澳门元' } },
+    LAK: { flag:'🇱🇦', name: { th:'กีบ ลาว',               en:'Lao Kip',              zh:'老挝基普' } },
   };
 
   window.currentRates = [];
@@ -312,7 +486,7 @@
     const sel = document.getElementById('convCurrency');
     const prevVal = sel.value;
     if (!window.currentRates.length) {
-      sel.innerHTML = '<option value="">ไม่มีข้อมูล</option>';
+      sel.innerHTML = `<option value="">${t('convNoData')}</option>`;
       return;
     }
     sel.innerHTML = window.currentRates
@@ -329,18 +503,74 @@
     const resEl = document.getElementById('convResult');
     const rateObj = window.currentRates.find(r => r.currency === cur);
     if (!rateObj || isNaN(amount) || amount <= 0) {
-      resEl.textContent = 'กรอกจำนวนเงินเพื่อคำนวณ';
+      resEl.textContent = t('convDefault');
       return;
     }
     const rate = type === 'buy' ? rateObj.buy : rateObj.sell;
     const total = amount * rate;
-    resEl.textContent = `${amount.toLocaleString()} ${cur} = ${total.toLocaleString(undefined,{maximumFractionDigits:2})} บาท (อัตรา ${rate})`;
+    resEl.textContent = t('convResult', {
+      amount: amount.toLocaleString(),
+      cur: cur,
+      total: total.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+      rate: rate,
+    });
+  }
+
+  // Re-render everything that depends on the chosen language, without
+  // re-fetching the sheet (uses the currency codes/rates already loaded).
+  function applyStaticTranslations() {
+    document.documentElement.lang = currentLang === 'th' ? 'th' : (currentLang === 'zh' ? 'zh' : 'en');
+    document.title = t('pageTitle');
+    document.getElementById('tagline').textContent = t('tagline');
+    document.getElementById('vipBadge').textContent = t('vipBadge');
+    document.getElementById('thFlag').textContent = t('thFlag');
+    document.getElementById('thCurrency').textContent = t('thCurrency');
+    document.getElementById('thName').textContent = t('thName');
+    document.getElementById('thBuy').textContent = t('thBuy');
+    document.getElementById('thSell').textContent = t('thSell');
+    document.getElementById('disclaimerText').textContent = t('disclaimer');
+    document.getElementById('convHeader').textContent = t('convHeader');
+    document.getElementById('convAmount').placeholder = t('convAmountPlaceholder');
+    document.getElementById('convTypeSell').textContent = t('convTypeSell');
+    document.getElementById('convTypeBuy').textContent = t('convTypeBuy');
+    document.getElementById('loginHeading').textContent = t('loginHeading');
+    document.getElementById('loginSubtitle').textContent = t('loginSubtitle');
+    document.getElementById('loginBtn').textContent = t('loginBtn');
+    document.getElementById('forgotLink').textContent = t('forgotLink');
+    document.getElementById('closedNote').textContent = t('closedNote');
+    document.getElementById('logoutBtn').textContent = t('logoutBtn');
+    document.getElementById('infoHeader').textContent = t('infoHeader');
+    document.getElementById('hoursLabel').textContent = t('hoursLabel');
+    document.getElementById('hoursValue').textContent = t('hoursValue');
+    document.getElementById('lineLabel').textContent = t('lineLabel');
+    document.getElementById('phoneLabel').textContent = t('phoneLabel');
+    document.getElementById('addressLabel').textContent = t('addressLabel');
+    document.getElementById('addressLinkSuffix').textContent = t('addressLinkSuffix');
+    document.getElementById('qrCaption').textContent = t('qrCaption');
+    document.getElementById('shareLine').textContent = t('shareLine');
+    document.getElementById('shareFb').textContent = t('shareFb');
+    document.getElementById('footerText').textContent = t('footerText');
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === currentLang);
+    });
+  }
+
+  function setLanguage(lang) {
+    if (!I18N[lang]) return;
+    currentLang = lang;
+    try { localStorage.setItem(LANG_KEY, lang); } catch(e) {}
+    applyStaticTranslations();
+    // Re-render the rate table / converter labels in the new language
+    // using the rates already in memory, without hitting the network again.
+    loadRates(lastIsVip, true);
   }
 
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  async function loadRates(isVip) {
+  async function loadRates(isVip, skipFetch) {
+    lastIsVip = isVip;
     const now = new Date();
     const thai = new Date(now.toLocaleString('en-US', {timeZone: 'Asia/Bangkok'}));
     const hour = thai.getHours();
@@ -348,8 +578,8 @@
     const closedNote = document.getElementById('closedNote');
     if (hour < 8 || hour >= 22) {
       document.getElementById('rateTable').innerHTML =
-        '<tr><td colspan="5" style="padding:20px;color:#888;text-align:center">⏰ ร้านปิดแล้ว<br>เปิดทำการ 08:00 - 22:00 น.</td></tr>';
-      document.getElementById('updated').textContent = 'นอกเวลาทำการ';
+        `<tr><td colspan="5" style="padding:20px;color:#888;text-align:center">${t('closedTable')}</td></tr>`;
+      document.getElementById('updated').textContent = t('closedUpdated');
       // Keep the VIP login form visible (so an already-logged-in member isn't confused
       // by it vanishing) but disable it and explain why, instead of hiding it outright.
       if (!isVip) {
@@ -360,21 +590,28 @@
     }
     loginBox.classList.remove('closed');
     closedNote.style.display = 'none';
+
+    // When just switching language (skipFetch), re-render from the rates
+    // already held in window.currentRates instead of re-fetching the CSV.
+    if (skipFetch && window.currentRates.length) {
+      renderRateTable(window.currentRates, isVip, window.lastUpdateStamp || '');
+      populateConverterOptions();
+      return;
+    }
+
     const url = isVip ? VIP_CSV : PUBLIC_CSV;
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const text = await res.text();
       const rows = text.trim().split('\n').slice(1);
-      const tbody = document.getElementById('rateTable');
-      tbody.innerHTML = '';
       let lastUpdate = '';
       let skippedRows = 0;
 
       let prevRates = {};
       try { prevRates = JSON.parse(localStorage.getItem(PREV_RATES_KEY)) || {}; } catch(e) { prevRates = {}; }
       const newRates = {};
-      window.currentRates = [];
+      const parsedRates = [];
 
       rows.forEach(row => {
         if (!row.trim()) return;
@@ -385,43 +622,27 @@
         const sell = parseFloat(cols[13]);
         if (!currency || isNaN(buy) || isNaN(sell)) { skippedRows++; return; }
         if (!lastUpdate) lastUpdate = cols[2] || '';
-        const info = CURRENCY_INFO[currency] || { name: currency, flag: '🏳️' };
         // Column O (index 14) can hold an override display label,
         // e.g. "USD (50-100)" / "USD (5-20)" for split denomination rows.
+        // This text comes from the shop's own sheet and is shown as-is
+        // regardless of the selected language.
         const displayLabel = cols[14]?.trim();
-        const displayName  = displayLabel || info.name;
-        const dec  = getDecimals(currency, buy);
 
         newRates[currency] = { buy, sell };
-        window.currentRates.push({ currency, name: displayName, buy, sell });
-
-        const prev = prevRates[currency];
-        const trendBuy  = getTrend(buy,  prev?.buy);
-        const trendSell = getTrend(sell, prev?.sell);
-
-        tbody.innerHTML += `
-          <tr>
-            <td class="flag">${info.flag}</td>
-            <td><strong>${currency}</strong></td>
-            <td>${displayName}</td>
-            <td class="buy">${buy.toFixed(dec)}<span class="trend ${trendBuy.cls}">${trendBuy.symbol}</span></td>
-            <td class="sell">${sell.toFixed(dec)}<span class="trend ${trendSell.cls}">${trendSell.symbol}</span></td>
-          </tr>`;
+        parsedRates.push({ currency, displayLabel, buy, sell });
       });
 
       try { localStorage.setItem(PREV_RATES_KEY, JSON.stringify(newRates)); } catch(e) {}
+      window.lastUpdateStamp = lastUpdate;
 
-      if (window.currentRates.length === 0) {
-        // The sheet returned data but none of it matched the expected column
-        // layout (currency / buy at col 13 / sell at col 14) — surface this
-        // clearly instead of silently rendering an empty table.
-        tbody.innerHTML =
-          '<tr><td colspan="5" style="padding:20px;color:#c2410c;text-align:center">⚠️ ไม่พบข้อมูลอัตราแลกเปลี่ยนที่อ่านได้<br>โครงสร้างชีทอาจมีการเปลี่ยนแปลง กรุณาตรวจสอบ</td></tr>';
-        document.getElementById('updated').textContent = 'ไม่สามารถอ่านข้อมูลอัตราได้';
+      if (parsedRates.length === 0) {
+        window.currentRates = [];
+        document.getElementById('rateTable').innerHTML =
+          `<tr><td colspan="5" style="padding:20px;color:#c2410c;text-align:center">${t('emptyDataTable')}</td></tr>`;
+        document.getElementById('updated').textContent = t('emptyDataUpdated');
         console.warn('BBX: parsed 0 valid rate rows out of', rows.length, '(skipped ' + skippedRows + '). Check CSV column layout.');
       } else {
-        document.getElementById('updated').textContent =
-          `${isVip ? '⭐ เรทพิเศษ VIP' : 'เรทปกติ'} | อัปเดตล่าสุด: ${lastUpdate}`;
+        renderRateTable(parsedRates, isVip, lastUpdate, prevRates);
         if (skippedRows > 0) {
           console.warn('BBX: skipped', skippedRows, 'malformed row(s) while parsing rates CSV.');
         }
@@ -430,10 +651,49 @@
       populateConverterOptions();
     } catch(e) {
       document.getElementById('rateTable').innerHTML =
-        '<tr><td colspan="5" style="padding:20px;color:#c2410c;text-align:center">⚠️ ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง</td></tr>';
-      document.getElementById('updated').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+        `<tr><td colspan="5" style="padding:20px;color:#c2410c;text-align:center">${t('loadFailTable')}</td></tr>`;
+      document.getElementById('updated').textContent = t('loadFailUpdated');
       console.error('BBX: failed to load rates —', e);
     }
+  }
+
+  // Renders the rate table (and rebuilds window.currentRates, used by the
+  // converter) from parsed {currency, displayLabel, buy, sell} rows, using
+  // whatever language is currently selected.
+  function renderRateTable(parsedRates, isVip, lastUpdate, prevRatesOverride) {
+    const tbody = document.getElementById('rateTable');
+    tbody.innerHTML = '';
+    window.currentRates = [];
+
+    let prevRates = prevRatesOverride;
+    if (!prevRates) {
+      try { prevRates = JSON.parse(localStorage.getItem(PREV_RATES_KEY)) || {}; } catch(e) { prevRates = {}; }
+    }
+
+    parsedRates.forEach(({ currency, displayLabel, buy, sell }) => {
+      const info = CURRENCY_INFO[currency] || { flag: '🏳️', name: {} };
+      const localName = (info.name && info.name[currentLang]) || (info.name && info.name.th) || currency;
+      const displayName = displayLabel || localName;
+      const dec = getDecimals(currency, buy);
+
+      window.currentRates.push({ currency, name: displayName, buy, sell });
+
+      const prev = prevRates[currency];
+      const trendBuy  = getTrend(buy,  prev?.buy);
+      const trendSell = getTrend(sell, prev?.sell);
+
+      tbody.innerHTML += `
+        <tr>
+          <td class="flag">${info.flag}</td>
+          <td><strong>${currency}</strong></td>
+          <td>${displayName}</td>
+          <td class="buy">${buy.toFixed(dec)}<span class="trend ${trendBuy.cls}">${trendBuy.symbol}</span></td>
+          <td class="sell">${sell.toFixed(dec)}<span class="trend ${trendSell.cls}">${trendSell.symbol}</span></td>
+        </tr>`;
+    });
+
+    document.getElementById('updated').textContent =
+      `${isVip ? t('vipRateLabel') : t('normalRateLabel')} | ${t('lastUpdatedPrefix')}${lastUpdate}`;
   }
 
   async function login() {
@@ -441,7 +701,7 @@
     const pass  = document.getElementById('password').value;
     document.getElementById('errorMsg').textContent = '';
     const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-    if (error) document.getElementById('errorMsg').textContent = 'Email หรือ Password ไม่ถูกต้อง';
+    if (error) document.getElementById('errorMsg').textContent = t('loginError');
   }
 
   async function logout() {
@@ -453,18 +713,19 @@
     const email = document.getElementById('email').value.trim();
     const errorEl = document.getElementById('errorMsg');
     if (!email) {
-      errorEl.textContent = 'กรุณากรอกอีเมลในช่องด้านบนก่อนกดลืมรหัสผ่าน';
+      errorEl.style.color = '#ef4444';
+      errorEl.textContent = t('forgotNeedEmail');
       return;
     }
     errorEl.style.color = '#1a7a1a';
-    errorEl.textContent = 'กำลังส่งลิงก์รีเซ็ตรหัสผ่าน...';
+    errorEl.textContent = t('forgotSending');
     const { error } = await sb.auth.resetPasswordForEmail(email);
     if (error) {
       errorEl.style.color = '#ef4444';
-      errorEl.textContent = 'เกิดข้อผิดพลาด: ' + error.message;
+      errorEl.textContent = t('forgotErrorPrefix') + error.message;
     } else {
       errorEl.style.color = '#1a7a1a';
-      errorEl.textContent = 'ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว กรุณาตรวจสอบกล่องจดหมาย';
+      errorEl.textContent = t('forgotSuccess');
     }
   }
 
@@ -479,6 +740,8 @@
   document.getElementById('convAmount').addEventListener('input', calcConvert);
   document.getElementById('convCurrency').addEventListener('change', calcConvert);
   document.getElementById('convType').addEventListener('change', calcConvert);
+
+  applyStaticTranslations();
 
   setInterval(async () => {
     const { data: { session } } = await sb.auth.getSession();
