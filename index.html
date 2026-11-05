@@ -72,8 +72,8 @@
 
     .disclaimer {
       width: 95%; max-width: 700px; margin: -8px auto 20px;
-      background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412;
-      padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; text-align: center;
+      background: #fffbeb; border: 1px solid #fbbf24; color: #92400e;
+      padding: 12px 14px; border-radius: 8px; font-size: 0.9rem; text-align: center; font-weight: 600;
     }
 
     #loginBox { width: 90%; max-width: 380px; margin: 20px auto;
@@ -175,7 +175,7 @@
   </tbody>
 </table>
 
-<p class="disclaimer" id="disclaimerText">⚠️ อัตราแลกเปลี่ยนอาจเปลี่ยนแปลงโดยไม่แจ้งล่วงหน้า กรุณาโทรสอบถามและยืนยันอัตรากับร้านก่อนทำธุรกรรมจำนวนมาก</p>
+<p class="disclaimer" id="disclaimerText">⭐ สมัครสมาชิก VIP รับเรทพิเศษเฉพาะสมาชิก! สอบถามและสมัครได้ที่ Line @bbxmoney หรือโทร 080-900-4451</p>
 
 <!-- เครื่องคำนวณแลกเงิน -->
 <div class="info-box" id="converterBox">
@@ -239,6 +239,10 @@
       <img src="line_oa_chat_690530_181326_group_0.png" alt="Line QR Code BBXmoney">
     </a>
   </div>
+  <div class="qr-section">
+    <p id="wechatQrCaption">สแกน QR Code เพื่อเพิ่มเพื่อนใน WeChat</p>
+    <img src="wechat_qr.png" alt="WeChat QR Code">
+  </div>
 </div>
 
 <div class="share-row">
@@ -265,7 +269,8 @@
       thFlag: 'ธง', thCurrency: 'สกุลเงิน', thName: 'ชื่อ', thBuy: 'รับซื้อ', thSell: 'ขาย',
       loadingInitial: 'กำลังโหลดข้อมูล...',
       loadingRow: 'กำลังโหลด...',
-      disclaimer: '⚠️ อัตราแลกเปลี่ยนอาจเปลี่ยนแปลงโดยไม่แจ้งล่วงหน้า กรุณาโทรสอบถามและยืนยันอัตรากับร้านก่อนทำธุรกรรมจำนวนมาก',
+      disclaimer: '⭐ สมัครสมาชิก VIP รับเรทพิเศษเฉพาะสมาชิก! สอบถามและสมัครได้ที่ Line @bbxmoney หรือโทร 080-900-4451',
+      wechatQrCaption: 'สแกน QR Code เพื่อเพิ่มเพื่อนใน WeChat',
       convHeader: '🧮 คำนวณแลกเงิน',
       convAmountPlaceholder: 'จำนวนเงินต่างประเทศ',
       convLoading: 'กำลังโหลด...',
@@ -313,7 +318,8 @@
       thFlag: 'Flag', thCurrency: 'Currency', thName: 'Name', thBuy: 'Buy', thSell: 'Sell',
       loadingInitial: 'Loading...',
       loadingRow: 'Loading...',
-      disclaimer: '⚠️ Exchange rates are subject to change without notice. Please call to confirm rates before large transactions.',
+      disclaimer: '⭐ Become a VIP member and get special member-only rates! Apply via Line @bbxmoney or call 080-900-4451.',
+      wechatQrCaption: 'Scan the QR code to add us on WeChat',
       convHeader: '🧮 Currency Converter',
       convAmountPlaceholder: 'Foreign currency amount',
       convLoading: 'Loading...',
@@ -361,7 +367,8 @@
       thFlag: '国旗', thCurrency: '货币', thName: '名称', thBuy: '买入', thSell: '卖出',
       loadingInitial: '加载中...',
       loadingRow: '加载中...',
-      disclaimer: '⚠️ 汇率可能随时变动，恕不另行通知。大额交易前请致电本店确认汇率。',
+      disclaimer: '⭐ 成为VIP会员，享受会员专属优惠汇率！欢迎通过Line @bbxmoney 或致电 080-900-4451 咨询申请。',
+      wechatQrCaption: '扫描二维码添加微信好友',
       convHeader: '🧮 货币计算器',
       convAmountPlaceholder: '外币金额',
       convLoading: '加载中...',
@@ -547,6 +554,7 @@
     document.getElementById('addressLabel').textContent = t('addressLabel');
     document.getElementById('addressLinkSuffix').textContent = t('addressLinkSuffix');
     document.getElementById('qrCaption').textContent = t('qrCaption');
+    document.getElementById('wechatQrCaption').textContent = t('wechatQrCaption');
     document.getElementById('shareLine').textContent = t('shareLine');
     document.getElementById('shareFb').textContent = t('shareFb');
     document.getElementById('footerText').textContent = t('footerText');
